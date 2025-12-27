@@ -25,35 +25,36 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <form
-        onSubmit={submit}
-        className="w-full max-w-sm p-6 border rounded space-y-3"
-      >
-        <h2 className="text-xl font-medium">Login</h2>
-        {err && <div className="text-red-600">{err}</div>}
-        <input
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
-          className="w-full border p-2 rounded"
-        />
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-          className="w-full border p-2 rounded"
-        />
-        <button className="w-full p-2 bg-black text-white rounded">
-          Sign in
-        </button>
-        <div className="text-sm mt-2">
-          No account?{" "}
-          <Link className="text-blue-600" to="/register">
-            Register
-          </Link>
-        </div>
-      </form>
+       <form
+  onSubmit={handleLogin}
+  style={{
+    width: "300px",
+    margin: "100px auto",
+    padding: "20px",
+    border: "1px solid #ccc",
+    borderRadius: "8px",
+  }}
+>
+  <h2 style={{ textAlign: "center" }}>Login</h2>
+
+  <input
+    placeholder="Email"
+    style={{ width: "100%", padding: "8px", marginBottom: "10px" }}
+    onChange={(e) => setEmail(e.target.value)}
+  />
+
+  <input
+    type="password"
+    placeholder="Password"
+    style={{ width: "100%", padding: "8px", marginBottom: "10px" }}
+    onChange={(e) => setPassword(e.target.value)}
+  />
+
+  <button style={{ width: "100%", padding: "8px" }}>
+    Login
+  </button>
+</form>
+
     </div>
   );
 }

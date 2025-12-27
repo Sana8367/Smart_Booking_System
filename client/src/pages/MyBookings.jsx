@@ -1,50 +1,62 @@
-import React, { useEffect, useState } from "react";
-import API from "../api/axios";
+ import { useEffect, useState } from "react";
 
 export default function MyBookings() {
   const [bookings, setBookings] = useState([]);
 
   useEffect(() => {
-    API.get("/bookings/me").then((res) => setBookings(res.data));
+    const data = JSON.parse(localStorage.getItem("mockBookings")) || [];
+    setBookings(data);
   }, []);
 
-  const cancel = async (id) => {
-    await API.delete(`/bookings/${id}`);
-    setBookings(bookings.filter((b) => b._id !== id));
+  const cancelBooking = (index) => {
+    const updated = bookings.filter((_, i) => i !== index);
+    setBookings(updated);
+    localStorage.setItem("mockBookings", JSON.stringify(updated));
   };
 
-  return (
-    <div className="p-6">
-      <h2 className="text-xl font-bold">My Bookings</h2>
-      <table className="w-full border mt-3">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="border p-2">Room</th>
-            <th className="border p-2">Date</th>
-            <th className="border p-2">Time</th>
-            <th className="border p-2">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {bookings.map((b) => (
-            <tr key={b._id}>
-              <td className="border p-2">{b.roomId?.name}</td>
-              <td className="border p-2">{b.date}</td>
-              <td className="border p-2">
-                {b.startTime} - {b.endTime}
-              </td>
-              <td className="border p-2">
-                <button
-                  onClick={() => cancel(b._id)}
-                  className="text-red-600"
-                >
-                  Cancel
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+   return (
+  <div style={{ padding: "20px" }}>
+    <h2>My Bookings</h2>
+
+    {bookings.length === 0 && (
+      <p style={{ marginTop: "20px", color: "#555" }}>
+        No bookings yet. Please book a room.
+      </p>
+    )}
+
+    {bookings.map((b, index) => (
+      <div
+        key={index}
+        style={{
+          border: "1px solid #ccc",
+          borderRadius: "8px",
+          padding: "15px",
+          marginTop: "15px",
+          maxWidth: "400px",
+        }}
+      >
+        <p><strong>Date:</strong> {b.date}</p>
+        <p>
+          <strong>Time:</strong> {b.startTime} – {b.endTime}
+        </p>
+
+        <button
+          onClick={() => cancelBooking(index)}
+          style={{
+            marginTop: "10px",
+            padding: "6px 12px",
+            backgroundColor: "#e74c3c",
+            color: "#fff",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+          }}
+        >
+          Cancel
+        </button>
+      </div>
+    ))}
+  </div>
+);
+
 }
