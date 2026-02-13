@@ -36,6 +36,7 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/rooms", roomRoutes);
 
 
+
 // Test route
 app.get("/", (req, res) => {
   res.send("Smart Booking System API is running 🚀");

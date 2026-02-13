@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import API from "../api/axios";
 
 export default function AdminRooms() {
@@ -6,39 +6,101 @@ export default function AdminRooms() {
   const [name, setName] = useState("");
   const [capacity, setCapacity] = useState("");
   const [location, setLocation] = useState("");
+  const [error, setError] = useState("");
 
-  const load = () => API.get("/rooms").then((res) => setRooms(res.data));
-  useEffect(load, []);
-
-  const addRoom = async (e) => {
-    e.preventDefault();
-    await API.post("/rooms", { name, capacity, location });
-    setName(""); setCapacity(""); setLocation("");
-    load();
+  // Load rooms from backend
+  const fetchRooms = async () => {
+    try {
+      const res = await API.get("/rooms");
+      setRooms(res.data);
+    } catch (err) {
+      setError("Failed to load rooms");
+    }
   };
 
-  const remove = async (id) => {
-    await API.delete(`/rooms/${id}`);
-    load();
+  useEffect(() => {
+    fetchRooms();
+  }, []);
+
+  // Create room (ADMIN)
+  const addRoom = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    if (!name || !capacity || !location) {
+      setError("All fields are required");
+      return;
+    }
+
+    try {
+      await API.post("/rooms", { name, capacity, location });
+      setName("");
+      setCapacity("");
+      setLocation("");
+      fetchRooms(); // refresh list
+    } catch (err) {
+      setError("Only admin can add rooms");
+    }
+  };
+
+  // Delete room (ADMIN)
+  const deleteRoom = async (id) => {
+    try {
+      await API.delete(`/rooms/${id}`);
+      fetchRooms();
+    } catch (err) {
+      setError("Delete failed");
+    }
   };
 
   return (
-    <div className="p-6 space-y-4">
-      <h2 className="text-xl font-bold">Admin – Rooms</h2>
-      <form onSubmit={addRoom} className="space-y-2">
-        <input value={name} onChange={e=>setName(e.target.value)} placeholder="Name" className="border p-2 rounded w-full"/>
-        <input value={capacity} onChange={e=>setCapacity(e.target.value)} placeholder="Capacity" className="border p-2 rounded w-full"/>
-        <input value={location} onChange={e=>setLocation(e.target.value)} placeholder="Location" className="border p-2 rounded w-full"/>
-        <button className="p-2 bg-black text-white rounded">Add Room</button>
+    <div style={{ padding: "20px" }}>
+      <h2>Admin – Manage Rooms</h2>
+
+      {error && <p style={{ color: "red" }}>{error}</p>}
+
+      {/* Add Room Form */}
+      <form onSubmit={addRoom} style={{ marginBottom: "20px" }}>
+        <input
+          placeholder="Room Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+
+        <input
+          type="number"
+          placeholder="Capacity"
+          value={capacity}
+          onChange={(e) => setCapacity(e.target.value)}
+        />
+
+        <input
+          placeholder="Location"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+        />
+
+        <button>Add Room</button>
       </form>
-      <ul>
-        {rooms.map(r => (
-          <li key={r._id} className="flex justify-between border p-2 rounded mt-2">
-            {r.name} ({r.capacity}) – {r.location}
-            <button onClick={()=>remove(r._id)} className="text-red-600">Delete</button>
-          </li>
-        ))}
-      </ul>
+
+      {/* Rooms List */}
+      {rooms.length === 0 && <p>No rooms found</p>}
+
+      {rooms.map((room) => (
+        <div
+          key={room._id}
+          style={{
+            border: "1px solid #ccc",
+            padding: "10px",
+            marginBottom: "10px",
+          }}
+        >
+          <p><strong>{room.name}</strong></p>
+          <p>Capacity: {room.capacity}</p>
+          <p>Location: {room.location}</p>
+          <button onClick={() => deleteRoom(room._id)}>Delete</button>
+        </div>
+      ))}
     </div>
   );
 }

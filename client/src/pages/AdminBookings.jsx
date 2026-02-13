@@ -1,48 +1,66 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import API from "../api/axios";
+import { useAuth } from "../auth/AuthContext";
 
 export default function AdminBookings() {
-  const [date, setDate] = useState("");
+  const { user } = useAuth();
   const [bookings, setBookings] = useState([]);
+  const [date, setDate] = useState("");
 
-  const fetch = async () => {
-    const res = await API.get(`/bookings?date=${date}`);
-    setBookings(res.data);
+  const fetchBookings = async () => {
+    try {
+      const res = await API.get("/bookings", {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+        params: date ? { date } : {},
+      });
+
+      setBookings(res.data);
+    } catch (err) {
+      alert("Failed to load bookings");
+    }
+  };
+
+  useEffect(() => {
+    fetchBookings();
+  }, []);
+
+  const cancelBooking = async (id) => {
+    await API.delete(`/bookings/admin/${id}`, {
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+    });
+
+    fetchBookings();
   };
 
   return (
-    <div className="p-6">
-      <h2 className="text-xl font-bold">Admin – Bookings</h2>
+    <div style={{ padding: "20px" }}>
+      <h2>Admin – All Bookings</h2>
+
       <input
         type="date"
         value={date}
         onChange={(e) => setDate(e.target.value)}
-        className="border p-2 rounded mr-2"
       />
-      <button onClick={fetch} className="p-2 bg-blue-600 text-white rounded">
-        Load Bookings
-      </button>
+      <button onClick={fetchBookings}>Filter</button>
 
-      <table className="w-full border mt-3">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="border p-2">User</th>
-            <th className="border p-2">Room</th>
-            <th className="border p-2">Time</th>
-          </tr>
-        </thead>
-        <tbody>
-          {bookings.map((b) => (
-            <tr key={b._id}>
-              <td className="border p-2">{b.userId?.email}</td>
-              <td className="border p-2">{b.roomId?.name}</td>
-              <td className="border p-2">
-                {b.date} {b.startTime}-{b.endTime}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {bookings.length === 0 && <p>No bookings found</p>}
+
+      {bookings.map((b) => (
+        <div key={b._id} style={{ border: "1px solid #ccc", margin: "10px", padding: "10px" }}>
+          <p><b>User:</b> {b.user?.name} ({b.user?.email})</p>
+          <p><b>Room:</b> {b.room?.name}</p>
+          <p><b>Date:</b> {b.date}</p>
+          <p><b>Time:</b> {b.timeSlot}</p>
+
+          <button onClick={() => cancelBooking(b._id)}>
+            Cancel Booking
+          </button>
+        </div>
+      ))}
     </div>
   );
 }
