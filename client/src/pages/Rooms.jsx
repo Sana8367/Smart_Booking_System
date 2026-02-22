@@ -5,7 +5,9 @@ export default function Rooms() {
   const [rooms, setRooms] = useState([]);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [date, setDate] = useState("");
-  const [timeSlot, setTimeSlot] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
+  const [bookedSlots, setBookedSlots] = useState([]);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -16,33 +18,50 @@ export default function Rooms() {
       .catch(() => setError("Failed to load rooms"));
   }, []);
 
+  // Fetch booked slots when room or date changes
+  useEffect(() => {
+    if (selectedRoom && date) {
+      API.get(`/bookings/room/${selectedRoom._id}?date=${date}`)
+        .then((res) => setBookedSlots(res.data))
+        .catch(() => setBookedSlots([]));
+    }
+  }, [selectedRoom, date]);
+
   // Book room
-const bookRoom = async () => {
-  setError("");
-  setSuccess("");
+  const bookRoom = async () => {
+    setError("");
+    setSuccess("");
 
-  try {
-    console.log("BOOKING DATA:", {
-      room: selectedRoom._id,
-      date,
-      timeSlot,
-    });
+    if (!date || !startTime || !endTime) {
+      return setError("Please select date and time");
+    }
 
-    const res = await API.post("/bookings", {
-      room: selectedRoom._id,
-      date,
-      timeSlot,
-    });
+    if (startTime >= endTime) {
+      return setError("End time must be after start time");
+    }
 
-    console.log("BOOKING RESPONSE:", res.data);
+    try {
+      await API.post("/bookings", {
+        room: selectedRoom._id,
+        date,
+        startTime,
+        endTime,
+      });
 
-    setSuccess("Room booked successfully!");
-  } catch (err) {
-    console.error("BOOKING ERROR:", err.response?.data || err.message);
-    setError("Booking failed");
-  }
-};
+      setSuccess("Room booked successfully!");
+      setStartTime("");
+      setEndTime("");
 
+      // Refresh booked slots
+      const res = await API.get(
+        `/bookings/room/${selectedRoom._id}?date=${date}`
+      );
+      setBookedSlots(res.data);
+
+    } catch (err) {
+      setError(err.response?.data?.message || "Booking failed");
+    }
+  };
 
   return (
     <div style={{ padding: "20px" }}>
@@ -57,8 +76,9 @@ const bookRoom = async () => {
           key={room._id}
           style={{
             border: "1px solid #ccc",
-            padding: "10px",
-            marginBottom: "10px",
+            padding: "15px",
+            marginBottom: "15px",
+            borderRadius: "8px",
           }}
         >
           <h3>{room.name}</h3>
@@ -71,31 +91,71 @@ const bookRoom = async () => {
         </div>
       ))}
 
-      {/* Booking Modal (Simple) */}
+      {/* Booking Section */}
       {selectedRoom && (
-        <div style={{ border: "1px solid black", padding: "15px" }}>
+        <div
+          style={{
+            marginTop: "20px",
+            padding: "20px",
+            border: "2px solid black",
+            borderRadius: "10px",
+          }}
+        >
           <h3>Book {selectedRoom.name}</h3>
 
+          {/* Date */}
           <input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
           />
 
-          <select
-            value={timeSlot}
-            onChange={(e) => setTimeSlot(e.target.value)}
-          >
-            <option value="">Select Time</option>
-            <option value="09:00-10:00">09:00-10:00</option>
-            <option value="10:00-11:00">10:00-11:00</option>
-            <option value="11:00-12:00">11:00-12:00</option>
-          </select>
+          <br /><br />
+
+          {/* Time Selection */}
+          <label>Start Time:</label>
+          <br />
+          <input
+            type="time"
+            value={startTime}
+            onChange={(e) => setStartTime(e.target.value)}
+          />
+
+          <br /><br />
+
+          <label>End Time:</label>
+          <br />
+          <input
+            type="time"
+            value={endTime}
+            onChange={(e) => setEndTime(e.target.value)}
+          />
 
           <br /><br />
 
           <button onClick={bookRoom}>Confirm Booking</button>
-          <button onClick={() => setSelectedRoom(null)}>Cancel</button>
+          <button
+            onClick={() => {
+              setSelectedRoom(null);
+              setBookedSlots([]);
+              setDate("");
+            }}
+            style={{ marginLeft: "10px" }}
+          >
+            Cancel
+          </button>
+
+          {/* Show Blocked Times */}
+          {date && bookedSlots.length > 0 && (
+            <div style={{ marginTop: "20px" }}>
+              <h4>Blocked Time Slots:</h4>
+              {bookedSlots.map((b) => (
+                <p key={b._id} style={{ color: "red" }}>
+                  {b.startTime} - {b.endTime}
+                </p>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -28,10 +28,19 @@ export default function MyBookings() {
       {bookings.length === 0 && <p>No bookings found</p>}
 
       {bookings.map((b) => (
-        <div key={b._id} style={{ border: "1px solid #ccc", margin: 10, padding: 10 }}>
-          <p><b>Room:</b> {b.room?.name}</p>
-          <p><b>Date:</b> {b.date}</p>
-          <p><b>Time:</b> {b.timeSlot}</p>
+        <div
+          key={b._id}
+          style={{ border: "1px solid #ccc", margin: 10, padding: 10 }}
+        >
+          <p>
+            <b>Room:</b> {b.room?.name}
+          </p>
+          <p>
+            <b>Date:</b> {b.date}
+          </p>
+          <p>
+            <b>Time:</b> {b.startTime} - {b.endTime}
+          </p>
 
           <button onClick={() => cancelBooking(b._id)}>
             Cancel Booking

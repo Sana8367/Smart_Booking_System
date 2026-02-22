@@ -23,8 +23,10 @@ export default function AdminBookings() {
   };
 
   useEffect(() => {
-    fetchBookings();
-  }, []);
+    if (user?.token) {
+      fetchBookings();
+    }
+  }, [user]);
 
   const cancelBooking = async (id) => {
     await API.delete(`/bookings/admin/${id}`, {
@@ -50,11 +52,26 @@ export default function AdminBookings() {
       {bookings.length === 0 && <p>No bookings found</p>}
 
       {bookings.map((b) => (
-        <div key={b._id} style={{ border: "1px solid #ccc", margin: "10px", padding: "10px" }}>
-          <p><b>User:</b> {b.user?.name} ({b.user?.email})</p>
-          <p><b>Room:</b> {b.room?.name}</p>
-          <p><b>Date:</b> {b.date}</p>
-          <p><b>Time:</b> {b.timeSlot}</p>
+        <div
+          key={b._id}
+          style={{
+            border: "1px solid #ccc",
+            margin: "10px",
+            padding: "10px",
+          }}
+        >
+          <p>
+            <b>User:</b> {b.user?.name} ({b.user?.email})
+          </p>
+          <p>
+            <b>Room:</b> {b.room?.name}
+          </p>
+          <p>
+            <b>Date:</b> {b.date}
+          </p>
+          <p>
+            <b>Time:</b> {b.startTime} - {b.endTime}
+          </p>
 
           <button onClick={() => cancelBooking(b._id)}>
             Cancel Booking

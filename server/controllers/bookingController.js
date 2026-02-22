@@ -9,56 +9,58 @@ const isExpiredBooking = (booking) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // If booking date is before today → expired
   if (bookingDate < today) return true;
 
-  // If booking is today, check timeSlot end
   if (bookingDate.getTime() === today.getTime()) {
-    const endTime = booking.timeSlot.split("-")[1]; // "10:00"
+    if (!booking.endTime) return false;
 
-    const [hours, minutes] = endTime.split(":");
-    const bookingEndTime = new Date();
-    bookingEndTime.setHours(hours, minutes, 0, 0);
+    const [hours, minutes] = booking.endTime.split(":");
 
-    if (bookingEndTime < now) return true;
+    const bookingEnd = new Date();
+    bookingEnd.setHours(hours, minutes, 0, 0);
+
+    if (bookingEnd < now) return true;
   }
 
   return false;
 };
 
-
 // CREATE BOOKING (Student)
 exports.createBooking = async (req, res) => {
   try {
-    const { room, date, timeSlot } = req.body;
+    const { room, date, startTime, endTime } = req.body;
 
-    if (!room || !date || !timeSlot) {
+    if (!room || !date || !startTime || !endTime) {
       return res.status(400).json({ message: "All fields required" });
     }
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const bookingDate = new Date(date);
-
-    if (bookingDate < today) {
-      return res.status(400).json({ message: "Cannot book past dates" });
+    if (startTime >= endTime) {
+      return res.status(400).json({ message: "Invalid time range" });
     }
 
-    const exists = await Booking.findOne({ room, date, timeSlot });
-    if (exists) {
-      return res.status(409).json({ message: "Slot already booked" });
+    const existingBooking = await Booking.findOne({
+      room,
+      date,
+      startTime: { $lt: endTime },
+      endTime: { $gt: startTime },
+    });
+
+    if (existingBooking) {
+      return res.status(409).json({
+        message: "This time range is already booked",
+      });
     }
 
     const booking = await Booking.create({
       user: req.user.id,
       room,
       date,
-      timeSlot,
+      startTime,
+      endTime,
     });
 
     res.status(201).json(booking);
   } catch (err) {
-    console.error(err);
     res.status(500).json({ message: "Booking failed" });
   }
 };
