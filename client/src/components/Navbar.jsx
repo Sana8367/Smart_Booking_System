@@ -1,7 +1,7 @@
- import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 
-export default function Navbar() {
+export default function Navbar({ simple = false }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -10,40 +10,74 @@ export default function Navbar() {
     navigate("/login");
   };
 
+  // ✅ SIMPLE NAVBAR
+  if (simple) {
+    return (
+      <nav className="navbar">
+        <h3 className="nav-brand">Smart Booking</h3>
+
+        <div className="nav-links">
+          <button onClick={handleLogout} className="logout-btn">
+            Logout
+          </button>
+        </div>
+      </nav>
+    );
+  }
+
+  // ✅ NORMAL NAVBAR
   return (
     <nav className="navbar">
       <h3 className="nav-brand">Smart Booking</h3>
 
       <div className="nav-links">
-         <NavLink
-  to="/rooms"
-  className={({ isActive }) =>
-    isActive ? "nav-link active" : "nav-link"
-  }
->
-  Rooms
-</NavLink>
 
- <NavLink to="/my-bookings" className={({ isActive }) =>
-  isActive ? "nav-link active" : "nav-link"
-}>
-  My Bookings
-</NavLink>
+        <NavLink
+          to="/dashboard"
+          className={({ isActive }) =>
+            isActive ? "nav-link active" : "nav-link"
+          }
+        >
+          Home
+        </NavLink>
 
-        {/* ✅ ADMIN LINKS (THIS IS IMPORTANT PART) */}
+        <NavLink
+          to="/contact"
+          className={({ isActive }) =>
+            isActive ? "nav-link active" : "nav-link"
+          }
+        >
+          Contact
+        </NavLink>
+
+        <NavLink
+          to="/profile"
+          className={({ isActive }) =>
+            isActive ? "nav-link active" : "nav-link"
+          }
+        >
+          Profile
+        </NavLink>
+
         {user?.role === "admin" && (
           <>
-             <NavLink to="/admin/rooms" className={({ isActive }) =>
-  isActive ? "nav-link active" : "nav-link"
-}>
-  Admin Rooms
-</NavLink>
+            <NavLink
+              to="/admin/rooms"
+              className={({ isActive }) =>
+                isActive ? "nav-link active" : "nav-link"
+              }
+            >
+              Admin Rooms
+            </NavLink>
 
- <NavLink to="/admin/bookings" className={({ isActive }) =>
-  isActive ? "nav-link active" : "nav-link"
-}>
-  Admin Bookings
-</NavLink>
+            <NavLink
+              to="/admin/bookings"
+              className={({ isActive }) =>
+                isActive ? "nav-link active" : "nav-link"
+              }
+            >
+              Admin Bookings
+            </NavLink>
           </>
         )}
 

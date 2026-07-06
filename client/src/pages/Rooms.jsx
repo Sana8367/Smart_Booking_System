@@ -1,5 +1,5 @@
-<<<<<<< HEAD
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import API from "../api/axios";
 
 export default function Rooms() {
@@ -10,16 +10,15 @@ export default function Rooms() {
   const [endTime, setEndTime] = useState("");
   const [bookedSlots, setBookedSlots] = useState([]);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
-  // Fetch rooms
+  /* Fetch rooms */
   useEffect(() => {
     API.get("/rooms")
       .then((res) => setRooms(res.data))
       .catch(() => setError("Failed to load rooms"));
   }, []);
 
-  // Fetch booked slots when room or date changes
+  /* Fetch booked slots */
   useEffect(() => {
     if (selectedRoom && date) {
       API.get(`/bookings/room/${selectedRoom._id}?date=${date}`)
@@ -28,17 +27,16 @@ export default function Rooms() {
     }
   }, [selectedRoom, date]);
 
-  // Book room
+  /* Book room */
   const bookRoom = async () => {
-    setError("");
-    setSuccess("");
-
     if (!date || !startTime || !endTime) {
-      return setError("Please select date and time");
+      toast.error("Please select date and time");
+      return;
     }
 
     if (startTime >= endTime) {
-      return setError("End time must be after start time");
+      toast.error("End time must be after start time");
+      return;
     }
 
     try {
@@ -49,172 +47,141 @@ export default function Rooms() {
         endTime,
       });
 
-      setSuccess("Room booked successfully!");
+      toast.success("Room booked successfully ✅");
+
       setStartTime("");
       setEndTime("");
 
-      // Refresh booked slots
       const res = await API.get(
         `/bookings/room/${selectedRoom._id}?date=${date}`
       );
+
       setBookedSlots(res.data);
-
     } catch (err) {
-      setError(err.response?.data?.message || "Booking failed");
-=======
- import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-
-export default function Rooms() {
-  const [date, setDate] = useState("");
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
-  const navigate = useNavigate();
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (!date || !startTime || !endTime) {
-      alert("Please select date and time");
-      return;
->>>>>>> 8b86cb27bdedb488488f98b6633d1d75248945a2
+      toast.error(err.response?.data?.message || "Booking failed ❌");
     }
-
-    if (startTime >= endTime) {
-      alert("End time must be after start time");
-      return;
-    }
-
-    const newBooking = { date, startTime, endTime };
-
-    const existing =
-      JSON.parse(localStorage.getItem("mockBookings")) || [];
-    localStorage.setItem(
-      "mockBookings",
-      JSON.stringify([...existing, newBooking])
-    );
-
-    navigate("/my-bookings");
   };
 
   return (
-<<<<<<< HEAD
-    <div style={{ padding: "20px" }}>
-      <h2>Available Rooms</h2>
+    <div className="dashboard-page page-fade min-h-[calc(100vh-60px)]">
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {success && <p style={{ color: "green" }}>{success}</p>}
+      {/* HEADER */}
+      <div className="dashboard-header">
+        <h1 className="dashboard-title">Available Rooms</h1>
+        <p className="dashboard-subtitle">
+          Browse and book available rooms
+        </p>
+      </div>
 
-      {/* Rooms List */}
-      {rooms.map((room) => (
-        <div
-          key={room._id}
-          style={{
-            border: "1px solid #ccc",
-            padding: "15px",
-            marginBottom: "15px",
-            borderRadius: "8px",
-          }}
-        >
-          <h3>{room.name}</h3>
-          <p>Capacity: {room.capacity}</p>
-          <p>Location: {room.location}</p>
+      {error && <p className="text-red-600 mb-3">{error}</p>}
 
-          <button onClick={() => setSelectedRoom(room)}>
-            Book Room
-          </button>
-        </div>
-      ))}
+      {/* ROOM CARDS */}
+      <div className="dashboard-grid">
+        {rooms.map((room) => (
+          <div key={room._id} className="dashboard-card">
 
-      {/* Booking Section */}
+            <h3 className="text-lg font-semibold mb-2 text-indigo-600">
+              {room.name}
+            </h3>
+
+            <p className="text-slate-600 mb-1">
+              👥 Capacity: <strong>{room.capacity}</strong>
+            </p>
+
+            <p className="text-slate-600 mb-4">
+              📍 Location: <strong>{room.location}</strong>
+            </p>
+
+            <button
+              onClick={() => setSelectedRoom(room)}
+              className="w-full py-2 rounded-lg text-white font-medium transition transform hover:scale-105"
+            >
+              Book Room
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {/* BOOKING MODAL */}
       {selectedRoom && (
         <div
-          style={{
-            marginTop: "20px",
-            padding: "20px",
-            border: "2px solid black",
-            borderRadius: "10px",
-          }}
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm"
+          onClick={() => setSelectedRoom(null)}
         >
-          <h3>Book {selectedRoom.name}</h3>
 
-          {/* Date */}
-=======
-    <div className="page-fade rooms-page">
-      <h2 className="rooms-title">Book a Room</h2>
-
-      <div className="rooms-container">
-        <form onSubmit={handleSubmit}>
-          <label>Date</label>
->>>>>>> 8b86cb27bdedb488488f98b6633d1d75248945a2
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-          />
-
-<<<<<<< HEAD
-          <br /><br />
-
-          {/* Time Selection */}
-          <label>Start Time:</label>
-          <br />
-=======
-          <label>Start Time</label>
->>>>>>> 8b86cb27bdedb488488f98b6633d1d75248945a2
-          <input
-            type="time"
-            value={startTime}
-            onChange={(e) => setStartTime(e.target.value)}
-          />
-
-<<<<<<< HEAD
-          <br /><br />
-
-          <label>End Time:</label>
-          <br />
-=======
-          <label>End Time</label>
->>>>>>> 8b86cb27bdedb488488f98b6633d1d75248945a2
-          <input
-            type="time"
-            value={endTime}
-            onChange={(e) => setEndTime(e.target.value)}
-          />
-
-<<<<<<< HEAD
-          <br /><br />
-
-          <button onClick={bookRoom}>Confirm Booking</button>
-          <button
-            onClick={() => {
-              setSelectedRoom(null);
-              setBookedSlots([]);
-              setDate("");
-            }}
-            style={{ marginLeft: "10px" }}
+          <div
+            className="bg-white rounded-2xl shadow-2xl p-8 w-[420px] animate-fadeIn"
+            onClick={(e) => e.stopPropagation()}
           >
-            Cancel
-          </button>
 
-          {/* Show Blocked Times */}
-          {date && bookedSlots.length > 0 && (
-            <div style={{ marginTop: "20px" }}>
-              <h4>Blocked Time Slots:</h4>
-              {bookedSlots.map((b) => (
-                <p key={b._id} style={{ color: "red" }}>
-                  {b.startTime} - {b.endTime}
-                </p>
-              ))}
+            <h2 className="text-2xl font-bold mb-4 text-indigo-600">
+              Book {selectedRoom.name}
+            </h2>
+
+            <div className="space-y-3">
+
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-full border p-2 rounded-lg"
+              />
+
+              <input
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                className="w-full border p-2 rounded-lg"
+              />
+
+              <input
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                className="w-full border p-2 rounded-lg"
+              />
+
             </div>
-          )}
+
+            {date && bookedSlots.length > 0 && (
+              <div className="bg-red-100 border border-red-300 rounded-lg p-3 mt-4">
+
+                <p className="text-red-600 font-semibold mb-1">
+                  Already Booked
+                </p>
+
+                {bookedSlots.map((b) => (
+                  <p key={b._id} className="text-sm">
+                    {b.startTime} - {b.endTime}
+                  </p>
+                ))}
+
+              </div>
+            )}
+
+            <div className="flex gap-3 mt-5">
+
+              <button
+                onClick={bookRoom}
+                className="flex-1 bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700"
+              >
+                Confirm
+              </button>
+
+              <button
+                onClick={() => setSelectedRoom(null)}
+                className="flex-1 border py-2 rounded-lg hover:bg-gray-100"
+              >
+                Cancel
+              </button>
+
+            </div>
+
+          </div>
+
         </div>
       )}
-=======
-          <button>Book</button>
-        </form>
-      </div>
->>>>>>> 8b86cb27bdedb488488f98b6633d1d75248945a2
+
     </div>
   );
 }

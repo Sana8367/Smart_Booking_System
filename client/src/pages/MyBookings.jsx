@@ -1,101 +1,84 @@
-<<<<<<< HEAD
 import API from "../api/axios";
 import { useEffect, useState } from "react";
-=======
- import { useEffect, useState } from "react";
->>>>>>> 8b86cb27bdedb488488f98b6633d1d75248945a2
 
 export default function MyBookings() {
-  const [bookings, setBookings] = useState([]);
+const [bookings, setBookings] = useState([]);
 
-<<<<<<< HEAD
-  const fetchBookings = async () => {
-    const res = await API.get("/bookings/my");
-    setBookings(res.data);
-  };
+const fetchBookings = async () => {
+const res = await API.get("/bookings/my");
+setBookings(res.data);
+};
 
-  const cancelBooking = async (id) => {
-    if (!window.confirm("Cancel this booking?")) return;
+const cancelBooking = async (id) => {
+if (!window.confirm("Cancel this booking?")) return;
 
-    await API.delete(`/bookings/${id}`);
-    alert("Booking cancelled");
-    fetchBookings();
-  };
 
-  useEffect(() => {
-    fetchBookings();
-  }, []);
+await API.delete(`/bookings/${id}`);
+fetchBookings();
 
-  return (
-    <div>
-      <h2>My Bookings</h2>
 
-      {bookings.length === 0 && <p>No bookings found</p>}
+};
 
-      {bookings.map((b) => (
-        <div
-          key={b._id}
-          style={{ border: "1px solid #ccc", margin: 10, padding: 10 }}
-        >
-          <p>
-            <b>Room:</b> {b.room?.name}
-          </p>
-          <p>
-            <b>Date:</b> {b.date}
-          </p>
-          <p>
-            <b>Time:</b> {b.startTime} - {b.endTime}
-          </p>
+useEffect(() => {
+fetchBookings();
+}, []);
 
-          <button onClick={() => cancelBooking(b._id)}>
-            Cancel Booking
-          </button>
-        </div>
-      ))}
-    </div>
-  );
-}
-=======
-  useEffect(() => {
-    const data = JSON.parse(localStorage.getItem("mockBookings")) || [];
-    setBookings(data);
-  }, []);
+return ( <div className="dashboard-page page-fade min-h-[calc(100vh-60px)]">
 
-  const cancelBooking = (index) => {
-    const updated = bookings.filter((_, i) => i !== index);
-    setBookings(updated);
-    localStorage.setItem("mockBookings", JSON.stringify(updated));
-  };
-
-     return (
-      <div className="page-fade">
-
-  <div>
-    <h2 style={{ marginBottom: "20px" }}>My Bookings</h2>
-
-    {bookings.length === 0 && <p>No bookings yet</p>}
-
-    <div className="dashboard-grid">
-     {bookings.map((b, index) => (
-  <div
-    key={b._id ?? b.id ?? index}
-    className="dashboard-card"
-  >
-    <p><strong>Date:</strong> {b.date}</p>
-    <p>
-      <strong>Time:</strong> {b.startTime} – {b.endTime}
+  {/* HEADER */}
+  <div className="dashboard-header mb-8">
+    <h1 className="dashboard-title">My Bookings</h1>
+    <p className="dashboard-subtitle">
+      View and manage your reservations
     </p>
   </div>
-))}
 
-
-
+  {bookings.length === 0 && (
+    <div className="text-center text-slate-500 mt-10">
+      No bookings found
     </div>
+  )}
+
+  {/* BOOKINGS GRID */}
+  <div className="dashboard-grid">
+
+    {bookings.map((b) => (
+      <div
+        key={b._id}
+        className="dashboard-card flex flex-col justify-between"
+      >
+
+        {/* ROOM DETAILS */}
+        <div>
+          <h3 className="text-lg font-semibold text-indigo-600 mb-3">
+            {b.room?.name || "Room"}
+          </h3>
+
+          <p className="text-sm text-slate-600 mb-1">
+            📅 <span className="font-medium">{b.date}</span>
+          </p>
+
+          <p className="text-sm text-slate-600">
+            ⏰ <span className="font-medium">
+              {b.startTime} - {b.endTime}
+            </span>
+          </p>
+        </div>
+
+        {/* CANCEL BUTTON */}
+        <button
+          onClick={() => cancelBooking(b._id)}
+          className="mt-5 w-full bg-red-500 hover:bg-red-600 active:scale-95 text-white py-2 rounded-lg text-sm transition"
+        >
+          Cancel Booking
+        </button>
+
+      </div>
+    ))}
+
   </div>
-  </div>
+
+</div>
+
 );
-
-
-
 }
->>>>>>> 8b86cb27bdedb488488f98b6633d1d75248945a2

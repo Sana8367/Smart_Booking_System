@@ -2,128 +2,130 @@ import { useEffect, useState } from "react";
 import API from "../api/axios";
 import { useAuth } from "../auth/AuthContext";
 
-<<<<<<< HEAD
 export default function AdminBookings() {
-  const { user } = useAuth();
-  const [bookings, setBookings] = useState([]);
-  const [date, setDate] = useState("");
+const { user } = useAuth();
+const [bookings, setBookings] = useState([]);
+const [date, setDate] = useState("");
 
-  const fetchBookings = async () => {
-    try {
-      const res = await API.get("/bookings", {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-        params: date ? { date } : {},
-      });
+const fetchBookings = async () => {
+try {
+const res = await API.get("/bookings", {
+headers: {
+Authorization: `Bearer ${user.token}`,
+},
+params: date ? { date } : {},
+});
 
-      setBookings(res.data);
-    } catch (err) {
-      alert("Failed to load bookings");
-    }
-  };
 
-  useEffect(() => {
-    if (user?.token) {
-      fetchBookings();
-    }
-  }, [user]);
+  setBookings(res.data);
+} catch {
+  alert("Failed to load bookings");
+}
 
-  const cancelBooking = async (id) => {
-    await API.delete(`/bookings/admin/${id}`, {
-      headers: {
-        Authorization: `Bearer ${user.token}`,
-      },
-    });
 
-    fetchBookings();
-  };
+};
 
-  return (
-    <div style={{ padding: "20px" }}>
-      <h2>Admin – All Bookings</h2>
+useEffect(() => {
+if (user?.token) {
+fetchBookings();
+}
+}, [user]);
 
-      <input
-        type="date"
-        value={date}
-        onChange={(e) => setDate(e.target.value)}
-      />
-      <button onClick={fetchBookings}>Filter</button>
+const cancelBooking = async (id) => {
+if (!window.confirm("Cancel this booking?")) return;
 
-=======
- export default function AdminBookings() {
-  // Mock bookings (frontend-only)
-  const bookings = [
-    {
-      id: 1,
-      room: "Conference Room",
-      user: "Student A",
-      date: "2025-01-10",
-      time: "10:00 - 11:00",
-    },
-    {
-      id: 2,
-      room: "Lab 1",
-      user: "Student B",
-      date: "2025-01-10",
-      time: "11:00 - 12:00",
-    },
-  ];
 
-  return (
-    <div className="page-fade">
+await API.delete(`/bookings/admin/${id}`, {
+  headers: {
+    Authorization: `Bearer ${user.token}`,
+  },
+});
 
-    <div style={{ padding: "20px" }}>
-      <h2>Admin – View Bookings</h2>
+fetchBookings();
 
->>>>>>> 8b86cb27bdedb488488f98b6633d1d75248945a2
-      {bookings.length === 0 && <p>No bookings found</p>}
 
-      {bookings.map((b) => (
-        <div
-<<<<<<< HEAD
-          key={b._id}
-          style={{
-            border: "1px solid #ccc",
-            margin: "10px",
-            padding: "10px",
-          }}
-        >
-          <p>
-            <b>User:</b> {b.user?.name} ({b.user?.email})
-          </p>
-          <p>
-            <b>Room:</b> {b.room?.name}
-          </p>
-          <p>
-            <b>Date:</b> {b.date}
-          </p>
-          <p>
-            <b>Time:</b> {b.startTime} - {b.endTime}
+};
+
+return ( <div className="dashboard-page page-fade min-h-[calc(100vh-60px)]">
+
+  {/* HEADER */}
+  <div className="dashboard-header mb-8">
+    <h1 className="dashboard-title">Admin – All Bookings</h1>
+    <p className="dashboard-subtitle">
+      View and manage all room reservations
+    </p>
+  </div>
+
+  {/* FILTER SECTION */}
+  <div className="flex flex-wrap items-center gap-3 mb-24">
+
+    <input
+      type="date"
+      value={date}
+      onChange={(e) => setDate(e.target.value)}
+      className="border p-2 rounded-md"
+    />
+
+    <button
+      onClick={fetchBookings}
+      className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-md transition"
+    >
+      Filter
+    </button>
+
+  </div>
+
+  {/* BOOKINGS GRID */}
+  {bookings.length === 0 && (
+    <p className="text-slate-500">No bookings found</p>
+  )}
+
+  <div className="dashboard-grid">
+
+    {bookings.map((b) => (
+      <div
+        key={b._id}
+        className="dashboard-card flex flex-col justify-between"
+      >
+
+        <div>
+
+          <h3 className="text-lg font-semibold text-indigo-600 mb-2">
+            {b.room?.name}
+          </h3>
+
+          <p className="text-sm text-slate-600 mb-1">
+            👤 <strong>User:</strong> {b.user?.name}
           </p>
 
-          <button onClick={() => cancelBooking(b._id)}>
-            Cancel Booking
-          </button>
+          <p className="text-sm text-slate-600 mb-1">
+            📧 <strong>Email:</strong> {b.user?.email}
+          </p>
+
+          <p className="text-sm text-slate-600 mb-1">
+            📅 <strong>Date:</strong> {b.date}
+          </p>
+
+          <p className="text-sm text-slate-600">
+            ⏰ <strong>Time:</strong> {b.startTime} - {b.endTime}
+          </p>
+
         </div>
-      ))}
-=======
-          key={b.id}
-          style={{
-            border: "1px solid #ccc",
-            padding: "12px",
-            marginBottom: "10px",
-            borderRadius: "6px",
-          }}
+
+        <button
+          onClick={() => cancelBooking(b._id)}
+          className="mt-4 bg-red-500 hover:bg-red-600 text-white py-2 rounded-md text-sm transition"
         >
-          <p><strong>Room:</strong> {b.room}</p>
-          <p><strong>User:</strong> {b.user}</p>
-          <p><strong>Date:</strong> {b.date}</p>
-          <p><strong>Time:</strong> {b.time}</p>
-        </div>
-      ))}
-    </div>
->>>>>>> 8b86cb27bdedb488488f98b6633d1d75248945a2
-    </div>
-  );
+          Cancel Booking
+        </button>
+
+      </div>
+    ))}
+
+  </div>
+
+</div>
+
+
+);
 }
